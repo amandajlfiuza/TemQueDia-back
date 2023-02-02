@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model booking {
+  id                                   Int           @id(map: "booking_pk") @default(autoincrement())
+  id_client                            Int
+  id_professional                      Int           @default(1)
+  id_service                           Int
+  scheduled_time                       DateTime      @unique @db.Timestamp(6)
+  type                                 booking_types
+  users_booking_id_clientTousers       users         @relation("booking_id_clientTousers", fields: [id_client], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "booking_fk0")
+  users_booking_id_professionalTousers users         @relation("booking_id_professionalTousers", fields: [id_professional], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "booking_fk1")
+  services                             services      @relation(fields: [id_service], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "booking_fk2")
+}
+
+model services {
+  id       Int            @id(map: "services_pk") @default(autoincrement())
+  name     String         @unique @db.VarChar(200)
+  type     services_types
+  duration DateTime       @db.Time(6)
+  booking  booking[]
+}
+
+model users {
+  id                                     Int       @id(map: "users_pk") @default(autoincrement())
+  is_admin                               Boolean   @default(false)
+  name                                   String    @db.VarChar(50)
+  email                                  String    @unique
+  phone                                  String    @db.Char(11)
+  booking_booking_id_clientTousers       booking[] @relation("booking_id_clientTousers")
+  booking_booking_id_professionalTousers booking[] @relation("booking_id_professionalTousers")
+}
+
+enum booking_types {
+  lock
+  scheduling
+}
+
+enum services_types {
+  Unhas
+  Sobrancelhas
+  Depila__o    @map("Depilação")
+}
